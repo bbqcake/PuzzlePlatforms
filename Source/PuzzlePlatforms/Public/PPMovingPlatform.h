@@ -22,10 +22,25 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Moving Platform")
 	float Speed = 20;
+	// this MakeEditWidget makes a little dimaond we can set our location to!
+	UPROPERTY(EditAnywhere, Category = "Moving Platform", Meta = (MakeEditWidget = true)) 
+	FVector TargetLocation;
+
+	void AddActiveTrigger();
+	void RemoveActiveTrigger();
+
 
 protected:
 
 	virtual void Tick(float DeltaTime) override;
+
+private:
+	FVector GlobalTargetLocation;
+
+	FVector GlobalStartLocation;
+
+	UPROPERTY(EditAnywhere)
+	int ActiveTriggers = 1;
 
 	
 	

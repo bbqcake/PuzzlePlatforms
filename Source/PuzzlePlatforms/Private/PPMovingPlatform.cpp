@@ -19,6 +19,10 @@ void APPMovingPlatform::BeginPlay()
 		SetReplicates(true);
 		SetReplicateMovement(true);
 	}
+
+	GlobalStartLocation = GetActorLocation();
+	GlobalTargetLocation = GetTransform().TransformPosition(TargetLocation);
+
 }
 
 void APPMovingPlatform::Tick(float DeltaTime)
@@ -26,14 +30,45 @@ void APPMovingPlatform::Tick(float DeltaTime)
 	//static mesh doesnt have a tick so super
 	//isnt needed but good to be safe
 	Super::Tick(DeltaTime);	
+
+	if (ActiveTriggers > 0)
+	{
+		if (HasAuthority())
+		{
+			FVector Location = GetActorLocation();
+			// Gives us the length of the vector
+			float JourneyLength = (GlobalTargetLocation - GlobalStartLocation).Size();
+			float JourneyTravelled = (Location - GlobalStartLocation).Size();
+
+			if (JourneyTravelled >= JourneyLength)
+			{
+				//This swaps Target and Location Around wiith a temp variable (swap)
+				FVector Swap = GlobalStartLocation;
+				GlobalStartLocation = GlobalTargetLocation;
+				GlobalTargetLocation = Swap;
+			}
+
+			FVector Direction = (GlobalTargetLocation - GlobalStartLocation).GetSafeNormal();
+			Location += Speed * DeltaTime * Direction;
+			SetActorLocation(Location);
+		};
+
+	}
 	
-	if (HasAuthority())
-	{ 
-	FVector Location = GetActorLocation();
-	Location += FVector(Speed * DeltaTime, 0, 0);
-	SetActorLocation(Location);
-	};
+	
 }
 
+void APPMovingPlatform::AddActiveTrigger()
+{
+	ActiveTriggers++;
+}
+
+void APPMovingPlatform::RemoveActiveTrigger()
+{
+	if (ActiveTriggers > 0)
+	{
+		ActiveTriggers--;
+	}
+}
 
 
